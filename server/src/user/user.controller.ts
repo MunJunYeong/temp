@@ -41,5 +41,3 @@ export class UserController {
     return await this.userService.login(loginDTO.id, loginDTO.pw);
   }
 }
-
-// test
