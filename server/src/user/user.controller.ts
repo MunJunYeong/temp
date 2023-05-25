@@ -25,7 +25,7 @@ export class UserController {
     type: 'bool',
   })
   @Post('/signup')
-  async createUser(@Body() userDTO: UserDTO) {
+  async createUser(@Body() userDTO: UserDTO): Promise<boolean> {
     return await this.userService.createUser(userDTO);
   }
 
@@ -37,7 +37,7 @@ export class UserController {
     type: 'bool',
   })
   @Post('/signin')
-  async login(@Body() loginDTO: LoginDTO) {
+  async login(@Body() loginDTO: LoginDTO): Promise<boolean> {
     return await this.userService.login(loginDTO.id, loginDTO.pw);
   }
 }
