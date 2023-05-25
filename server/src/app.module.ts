@@ -1,24 +1,20 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { User } from './user/entity/user.entity';
+import { DatabaseModule } from './database/database.module';
+import { ConfigModule } from '@nestjs/config';
+import { WeatherModule } from './weather/weather.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'coreline01!',
-      database: 'temp',
-      entities: [],
-      synchronize: true,
+    ConfigModule.forRoot({
+      // dev, prod 환경으로 나누고자 한다면 환경에 맞는 env 추가 후 설정 해야함.
+      envFilePath: '.env',
     }),
-    ,
     UserModule,
+    DatabaseModule,
+    WeatherModule,
   ],
   controllers: [AppController],
   providers: [AppService],
