@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -18,8 +18,32 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // is duplicated id
+  @ApiOperation({ summary: 'is duplicated id' })
+  @ApiOkResponse({
+    description: 'is duplicated',
+    type: 'bool',
+  })
+  @Get()
+  async isDuplicatedID(@Param() id: string): Promise<boolean>{
+    return await this.userService.isDuplicatedID(id);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // is duplicated email
+  @ApiOperation({ summary: 'is duplicated email' })
+  @ApiOkResponse({
+    description: 'is duplicated',
+    type: 'bool',
+  })
+  @Get()
+  async isDuplicatedEmail(@Param() email: string): Promise<boolean>{
+    return await this.userService.isDuplicatedEmail(email);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // sign up
-  @ApiOperation({ summary: 'sign-in' })
+  @ApiOperation({ summary: 'sign up' })
   @ApiOkResponse({
     description: 'success',
     type: 'bool',
