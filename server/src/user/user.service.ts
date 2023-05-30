@@ -1,13 +1,21 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+
+// DTO / entity
 import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
-import { UserRepository } from './user.repo';
 import { User } from './entity/user.entity';
 
 // lib
-import * as bcrypt from 'bcrypt';
+import { UserRepository } from './user.repo';
+import { LoginOutputDTO } from './dto/controller.dto';
+
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(
+    private readonly userRepo: UserRepository,
+    private readonly jwtService: JwtService,
+  ) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated id
   async IsDuplicatedID(id: string): Promise<IsDuplicated> {
@@ -107,14 +115,13 @@ export class UserService {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // login
-  async Login(id: string, pw: string): Promise<IsSuccess> {
-    let result: IsSuccess = { success: false };
+  async Login(id: string, pw: string): Promise<LoginOutputDTO> {
     // 1. id에 맞는 user 찾아오기
     let user: User | undefined;
     try {
       user = await this.userRepo.findOneByID(id);
       if (!user) {
-        return result;
+        return undefined;
       }
     } catch (err) {
       throw new HttpException(
@@ -129,12 +136,30 @@ export class UserService {
     // 2. pw 확인
     const validatePassword = await bcrypt.compare(pw, user.pw);
     if (!validatePassword) {
-      return result;
+      return undefined;
     }
 
-    // TODO: jwt token 발급
-
-    result.success = true;
-    return result;
+    // 3. jwt 토큰 발행
+    const res: LoginOutputDTO = {
+      access_token: this.jwtService.sign(
+        {
+          user_idx: user.user_idx,
+          id: user.id,
+          email: user.email,
+        },
+        {
+          expiresIn: '4h',
+        },
+      ),
+      refresh_token: this.jwtService.sign(
+        {
+          user_idx: user.user_idx,
+        },
+        {
+          expiresIn: '15d',
+        },
+      ),
+    };
+    return res;
   }
 }

@@ -5,7 +5,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { LoginInputDTO } from './dto/controller.dto';
+import { LoginInputDTO, LoginOutputDTO } from './dto/controller.dto';
 import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
 import { UserService } from './user.service';
 
@@ -58,10 +58,10 @@ export class UserController {
   @ApiOperation({ summary: 'sign-in' })
   @ApiOkResponse({
     description: 'success',
-    type: IsSuccess,
+    type: LoginOutputDTO,
   })
   @Post('/signin')
-  async login(@Body() loginDTO: LoginInputDTO): Promise<IsSuccess> {
+  async login(@Body() loginDTO: LoginInputDTO): Promise<LoginOutputDTO> {
     return await this.userService.Login(loginDTO.id, loginDTO.pw);
   }
 }
