@@ -81,12 +81,12 @@ export class UserService {
       name: userDTO.name,
       email: userDTO.email,
     };
-
+    
     // 2. check duplicated
     {
       try {
-        if (await this.IsDuplicatedID(user.id)) return result;
-        if (await this.IsDuplicatedEmail(user.email)) return result;
+        if ((await this.IsDuplicatedID(user.id)).is_duplicated) return result;
+        if ((await this.IsDuplicatedEmail(user.email)).is_duplicated) return result;
       } catch (err) {
         // IsDuplicatedID, IsDuplicatedEmail 함수에서 error를 wrap 해주고 있음.
         throw err;

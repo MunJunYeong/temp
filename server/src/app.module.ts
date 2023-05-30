@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { WeatherModule } from './weather/weather.module';
+import { DatabaseModule } from './lib/database/database.module';
 
 @Module({
   imports: [
