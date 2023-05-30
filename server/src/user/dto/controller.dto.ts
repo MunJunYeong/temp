@@ -23,7 +23,7 @@ export class LoginOutputDTO {
 
   @ApiProperty({
     example: 'string',
-    description: 'jwt refresh token',
+    description: 'jwt refresgh token',
   })
   refresh_token: string;
 }

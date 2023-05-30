@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { UserDTO } from './dto/common.dto';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
 import { UserRepository } from './user.repo';
 import { User } from './entity/user.entity';
 
@@ -10,7 +10,8 @@ export class UserService {
   constructor(private readonly userRepo: UserRepository) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated id
-  async isDuplicatedID(id: string): Promise<boolean> {
+  async IsDuplicatedID(id: string): Promise<IsDuplicated> {
+    let result: IsDuplicated = { is_duplicated: false };
     try {
       const res = await this.userRepo.findBy({
         id,
@@ -18,17 +19,25 @@ export class UserService {
       // ID exist
       if (res.length > 0) {
         console.info('is duplicated ID');
-        return true;
+        result.is_duplicated = true;
+        return result;
       }
     } catch (err) {
-      console.log(err);
+      throw new HttpException(
+        {
+          message: 'Failed to check user ID',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return false;
+    return result;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated email
-  async isDuplicatedEmail(email: string): Promise<boolean> {
+  async IsDuplicatedEmail(email: string): Promise<IsDuplicated> {
+    let result: IsDuplicated = { is_duplicated: false };
     try {
       const res = await this.userRepo.findBy({
         email,
@@ -36,17 +45,25 @@ export class UserService {
       // Email exist
       if (res.length > 0) {
         console.info('is duplicated Email');
-        return true;
+        result.is_duplicated = true;
+        return result;
       }
     } catch (err) {
-      console.log(err);
+      throw new HttpException(
+        {
+          message: 'Failed to check user Email',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-    return false;
+    return result;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // sign-up
-  async createUser(userDTO: UserDTO) {
+  async CreateUser(userDTO: UserDTO): Promise<IsSuccess> {
+    let result: IsSuccess = { success: false };
     // 1. create User entity
     const user: User = {
       // user_idx의 경우 auto increment라서 임의의 값 지정해줌
@@ -60,10 +77,11 @@ export class UserService {
     // 2. check duplicated
     {
       try {
-        if (await this.isDuplicatedID(user.id)) return false;
-        if (await this.isDuplicatedEmail(user.email)) return false;
+        if (await this.IsDuplicatedID(user.id)) return result;
+        if (await this.IsDuplicatedEmail(user.email)) return result;
       } catch (err) {
-        // TODO: 통신 오류
+        // IsDuplicatedID, IsDuplicatedEmail 함수에서 error를 wrap 해주고 있음.
+        throw err;
       }
     }
 
@@ -71,39 +89,52 @@ export class UserService {
     user.pw = await bcrypt.hash(user.pw, 10);
 
     // 4. save user
-    let res: any;
     try {
-      res = await this.userRepo.createUser(user);
+      const res = await this.userRepo.createUser(user);
+      if (!res) return result;
     } catch (err) {
-      console.log(err);
+      throw new HttpException(
+        {
+          message: 'Failed to create user',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    if (!res) return false;
-    return true;
+    result.success = true;
+    return result;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // login
-  async login(id: string, pw: string) {
+  async Login(id: string, pw: string): Promise<IsSuccess> {
+    let result: IsSuccess = { success: false };
     // 1. id에 맞는 user 찾아오기
     let user: User | undefined;
     try {
       user = await this.userRepo.findOneByID(id);
       if (!user) {
-        return false;
+        return result;
       }
     } catch (err) {
-      console.log(err);
+      throw new HttpException(
+        {
+          message: 'Failed to find user',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     // 2. pw 확인
     const validatePassword = await bcrypt.compare(pw, user.pw);
     if (!validatePassword) {
-      return false;
+      return result;
     }
 
     // TODO: jwt token 발급
 
-    return true;
+    result.success = true;
+    return result;
   }
 }

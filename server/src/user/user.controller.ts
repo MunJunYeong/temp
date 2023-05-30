@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -6,7 +6,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { LoginInputDTO } from './dto/controller.dto';
-import { UserDTO } from './dto/common.dto';
+import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
@@ -22,11 +22,11 @@ export class UserController {
   @ApiOperation({ summary: 'check duplicated id' })
   @ApiOkResponse({
     description: 'is duplicated',
-    type: 'bool',
+    type: IsDuplicated,
   })
-  @Get()
-  async isDuplicatedID(@Param() id: string): Promise<boolean>{
-    return await this.userService.isDuplicatedID(id);
+  @Get('/check-duplicate/id')
+  async isDuplicatedID(@Query('id') id: string): Promise<IsDuplicated> {
+    return await this.userService.IsDuplicatedID(id);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,11 +34,11 @@ export class UserController {
   @ApiOperation({ summary: 'check duplicated email' })
   @ApiOkResponse({
     description: 'is duplicated',
-    type: 'bool',
+    type: IsDuplicated,
   })
-  @Get()
-  async isDuplicatedEmail(@Param() email: string): Promise<boolean>{
-    return await this.userService.isDuplicatedEmail(email);
+  @Get('/check-duplicate/email')
+  async isDuplicatedEmail(@Query('id') email: string): Promise<IsDuplicated> {
+    return await this.userService.IsDuplicatedEmail(email);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,11 +46,11 @@ export class UserController {
   @ApiOperation({ summary: 'sign up' })
   @ApiOkResponse({
     description: 'success',
-    type: 'bool',
+    type: IsSuccess,
   })
   @Post('/signup')
-  async createUser(@Body() userDTO: UserDTO): Promise<boolean> {
-    return await this.userService.createUser(userDTO);
+  async createUser(@Body() userDTO: UserDTO): Promise<IsSuccess> {
+    return await this.userService.CreateUser(userDTO);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,10 +58,10 @@ export class UserController {
   @ApiOperation({ summary: 'sign-in' })
   @ApiOkResponse({
     description: 'success',
-    type: 'bool',
+    type: IsSuccess,
   })
   @Post('/signin')
-  async login(@Body() loginDTO: LoginInputDTO): Promise<boolean> {
-    return await this.userService.login(loginDTO.id, loginDTO.pw);
+  async login(@Body() loginDTO: LoginInputDTO): Promise<IsSuccess> {
+    return await this.userService.Login(loginDTO.id, loginDTO.pw);
   }
 }
