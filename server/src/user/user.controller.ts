@@ -5,7 +5,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { LoginDTO } from './dto/controller.dto';
+import { LoginInputDTO } from './dto/controller.dto';
 import { UserDTO } from './dto/common.dto';
 import { UserService } from './user.service';
 
@@ -18,8 +18,8 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // is duplicated id
-  @ApiOperation({ summary: 'is duplicated id' })
+  // check duplicated id
+  @ApiOperation({ summary: 'check duplicated id' })
   @ApiOkResponse({
     description: 'is duplicated',
     type: 'bool',
@@ -30,8 +30,8 @@ export class UserController {
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // is duplicated email
-  @ApiOperation({ summary: 'is duplicated email' })
+  // check duplicated email
+  @ApiOperation({ summary: 'check duplicated email' })
   @ApiOkResponse({
     description: 'is duplicated',
     type: 'bool',
@@ -61,7 +61,7 @@ export class UserController {
     type: 'bool',
   })
   @Post('/signin')
-  async login(@Body() loginDTO: LoginDTO): Promise<boolean> {
+  async login(@Body() loginDTO: LoginInputDTO): Promise<boolean> {
     return await this.userService.login(loginDTO.id, loginDTO.pw);
   }
 }

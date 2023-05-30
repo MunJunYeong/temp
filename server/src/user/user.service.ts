@@ -15,9 +15,9 @@ export class UserService {
       const res = await this.userRepo.findBy({
         id,
       });
+      // ID exist
       if (res.length > 0) {
-        console.log(res.length);
-
+        console.info('is duplicated ID');
         return true;
       }
     } catch (err) {
@@ -25,9 +25,22 @@ export class UserService {
     }
     return false;
   }
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated email
   async isDuplicatedEmail(email: string): Promise<boolean> {
+    try {
+      const res = await this.userRepo.findBy({
+        email,
+      });
+      // Email exist
+      if (res.length > 0) {
+        console.info('is duplicated Email');
+        return true;
+      }
+    } catch (err) {
+      console.log(err);
+    }
     return false;
   }
 
@@ -47,16 +60,14 @@ export class UserService {
     // 2. check duplicated
     {
       try {
-        const isDuplicatedID = await this.isDuplicatedID(user.id);
-        const isDuplicatedEmail = await this.isDuplicatedEmail(user.email);
-
-        if (isDuplicatedID || isDuplicatedEmail) return false;
+        if (await this.isDuplicatedID(user.id)) return false;
+        if (await this.isDuplicatedEmail(user.email)) return false;
       } catch (err) {
         // TODO: 통신 오류
       }
     }
 
-    // 3. pw 암호화
+    // 3. pw encryption
     user.pw = await bcrypt.hash(user.pw, 10);
 
     // 4. save user
@@ -91,7 +102,7 @@ export class UserService {
       return false;
     }
 
-    // TODO: jwt token 발급 
+    // TODO: jwt token 발급
 
     return true;
   }
