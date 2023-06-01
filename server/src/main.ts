@@ -7,6 +7,7 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // add filter
@@ -16,6 +17,7 @@ async function bootstrap() {
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     optionsSuccessStatus: 200,
+
   });
   app.useGlobalPipes(
     new ValidationPipe({
