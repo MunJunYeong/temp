@@ -1,10 +1,17 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { WeatherModule } from './weather/weather.module';
 import { DatabaseModule } from './lib/database/database.module';
+import { CustomMiddleware } from './lib/middleware/middleware.service';
+import { JwtModule } from './lib/jwt/jwt.module';
 
 @Module({
   imports: [
@@ -15,8 +22,17 @@ import { DatabaseModule } from './lib/database/database.module';
     UserModule,
     WeatherModule,
     DatabaseModule,
+    JwtModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // consumer.apply(CustomMiddleware).forRoutes('*')
+    consumer.apply(CustomMiddleware).forRoutes({
+      path: 'v1/users/middleware',
+      method: RequestMethod.GET,
+    });
+  }
+}

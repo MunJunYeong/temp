@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 // DTO / entity
@@ -9,6 +8,7 @@ import { User } from './entity/user.entity';
 // lib
 import { UserRepository } from './user.repo';
 import { LoginOutputDTO } from './dto/controller.dto';
+import { JwtService } from 'src/lib/jwt/jwt.service';
 
 @Injectable()
 export class UserService {
@@ -81,14 +81,15 @@ export class UserService {
       name: userDTO.name,
       email: userDTO.email,
     };
-    
+
     // 2. check duplicated
     {
       try {
         if ((await this.IsDuplicatedID(user.id)).is_duplicated) return result;
-        if ((await this.IsDuplicatedEmail(user.email)).is_duplicated) return result;
+        if ((await this.IsDuplicatedEmail(user.email)).is_duplicated)
+          return result;
       } catch (err) {
-        // IsDuplicatedID, IsDuplicatedEmail 함수에서 error를 wrap 해주고 있음.
+        // already wrap error
         throw err;
       }
     }
@@ -115,50 +116,42 @@ export class UserService {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // login
-  async Login(id: string, pw: string): Promise<LoginOutputDTO> {
+  async Login(id: string, pw: string): Promise<LoginOutputDTO | boolean> {
     // 1. id에 맞는 user 찾아오기
     let user: User | undefined;
-    try {
-      user = await this.userRepo.findOneByID(id);
-      if (!user) {
-        return undefined;
+    {
+      try {
+        user = await this.userRepo.findOneByID(id);
+        if (!user) {
+          return false;
+        }
+      } catch (err) {
+        throw new HttpException(
+          {
+            message: 'Failed to find user',
+            error: err.message,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
-    } catch (err) {
-      throw new HttpException(
-        {
-          message: 'Failed to find user',
-          error: err.message,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
 
     // 2. pw 확인
     const validatePassword = await bcrypt.compare(pw, user.pw);
     if (!validatePassword) {
-      return undefined;
+      return false;
     }
 
     // 3. jwt 토큰 발행
     const res: LoginOutputDTO = {
-      access_token: this.jwtService.sign(
-        {
-          user_idx: user.user_idx,
-          id: user.id,
-          email: user.email,
-        },
-        {
-          expiresIn: '4h',
-        },
-      ),
-      refresh_token: this.jwtService.sign(
-        {
-          user_idx: user.user_idx,
-        },
-        {
-          expiresIn: '15d',
-        },
-      ),
+      access_token: this.jwtService.generateAccessToken({
+        user_idx: user.user_idx,
+        id: user.id,
+        email: user.email,
+      }),
+      refresh_token: this.jwtService.generateRefreshToken({
+        user_idx: user.user_idx,
+      }),
     };
     return res;
   }

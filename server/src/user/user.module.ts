@@ -4,18 +4,15 @@ import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { UserRepository } from './user.repo';
 import { User } from './entity/user.entity';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule } from 'src/lib/jwt/jwt.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    JwtModule.register({
-      // TODO: 만약 env 활용하려면 cfg module, jwt module 추가해주기
-      secret: 'mysecret',
-    }),
+    JwtModule
   ],
   controllers: [UserController],
   providers: [UserService, UserRepository],
-  exports: [JwtModule],
+  exports : [UserService, UserRepository]
 })
 export class UserModule {}
