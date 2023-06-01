@@ -22,9 +22,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       disableErrorMessages: false, // dev 환경에서만, 만약 배포 가정하에 true 추천
-
-
-      
     }),
   );
 
