@@ -94,6 +94,7 @@ export class UserService {
       }
     }
 
+    
     // 3. pw encryption
     user.pw = await bcrypt.hash(user.pw, 10);
 
