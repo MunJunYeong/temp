@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
 import { WeatherModule } from './weather/weather.module';
 import { DatabaseModule } from './lib/database/database.module';
 import { CustomMiddleware } from './lib/middleware/middleware.service';
+import { JwtModule } from './lib/jwt/jwt.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { CustomMiddleware } from './lib/middleware/middleware.service';
     UserModule,
     WeatherModule,
     DatabaseModule,
+    JwtModule
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -29,7 +31,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // consumer.apply(CustomMiddleware).forRoutes('*')
     consumer.apply(CustomMiddleware).forRoutes({
-      path: 'v1/users/~',
+      path: 'v1/users/middleware',
       method: RequestMethod.GET,
     });
   }

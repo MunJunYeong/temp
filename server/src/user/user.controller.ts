@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -61,7 +61,16 @@ export class UserController {
     type: LoginOutputDTO,
   })
   @Post('/signin')
-  async login(@Body() loginDTO: LoginInputDTO): Promise<LoginOutputDTO> {
+  async login(@Body() loginDTO: LoginInputDTO): Promise<LoginOutputDTO | boolean> {
     return await this.userService.Login(loginDTO.id, loginDTO.pw);
+  }
+  
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // test check middleware
+  @Get('/middleware')
+  async testMiddleware(@Req() request: Request){
+    return {
+      "token_user" : request['user']
+    };
   }
 }

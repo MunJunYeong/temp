@@ -6,20 +6,29 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { JwtService } from '../jwt/jwt.service';
+import { UserRepository } from 'src/user/user.repo';
 
 @Injectable()
 export class CustomMiddleware implements NestMiddleware {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userRepo: UserRepository,
+  ) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     // 미들웨어 로직
     console.log('Custom middleware is running...');
 
-    const accessToken: string = req.headers['access_token'] as string;
+    const accessToken: string = req.headers.authorization;
+
     try {
+      // 1. toekn decoded
       const decoded = this.jwtService.verifyToken(accessToken);
-      // 검증 성공 시에 처리할 로직
-      console.log('Decoded Token:', decoded);
+      // 2. find user by id in token data
+      const user = await this.userRepo.findOneByID(decoded['id']);
+      // 3. set request in user
+      req['user'] = user;
+
     } catch (err) {
       throw new HttpException(
         {
@@ -30,6 +39,6 @@ export class CustomMiddleware implements NestMiddleware {
       );
     }
 
-    next(); // 다음 미들웨어나 요청 핸들러로 제어를 전달
+    next();
   }
 }
