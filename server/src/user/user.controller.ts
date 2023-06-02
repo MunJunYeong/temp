@@ -1,3 +1,4 @@
+// core
 import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import {
   ApiOkResponse,
@@ -5,6 +6,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
+// lib
 import { LoginInputDTO, LoginOutputDTO } from './dto/controller.dto';
 import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
 import { UserService } from './user.service';
