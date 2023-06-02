@@ -1,20 +1,22 @@
+// core
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 
-// DTO / entity
+// lib
+import * as bcrypt from 'bcrypt';
 import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
 import { User } from './entity/user.entity';
 
-// lib
 import { UserRepository } from './user.repo';
 import { LoginOutputDTO } from './dto/controller.dto';
 import { JwtService } from 'src/lib/jwt/jwt.service';
+import { LoggerService } from 'src/lib/logger/logger.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly logger: LoggerService
   ) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated id
@@ -31,6 +33,7 @@ export class UserService {
         return result;
       }
     } catch (err) {
+      this.logger.error("Failed to check user ID", "IsDuplicatedID");
       throw new HttpException(
         {
           message: 'Failed to check user ID',
@@ -118,6 +121,8 @@ export class UserService {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // login
   async Login(id: string, pw: string): Promise<LoginOutputDTO | boolean> {
+    this.logger.info("lolololo")
+    this.logger.error("aaaaa", "bbbb")
     // 1. id에 맞는 user 찾아오기
     let user: User | undefined;
     {
