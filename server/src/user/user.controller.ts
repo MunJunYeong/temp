@@ -9,7 +9,7 @@ import {
 
 // lib
 import { LoginInputDTO, LoginOutputDTO } from './dto/controller.dto';
-import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
+import { UserDTO } from './dto/common.dto';
 import { UserService } from './user.service';
 
 @ApiTags('user')
@@ -25,10 +25,10 @@ export class UserController {
   @ApiOperation({ summary: 'check duplicated id' })
   @ApiOkResponse({
     description: 'is duplicated',
-    type: IsDuplicated,
+    type: Boolean,
   })
   @Get('/check-duplicate/id')
-  async isDuplicatedID(@Query('id') id: string): Promise<IsDuplicated> {
+  async isDuplicatedID(@Query('id') id: string): Promise<Boolean> {
     return await this.userService.IsDuplicatedID(id);
   }
 
@@ -37,10 +37,10 @@ export class UserController {
   @ApiOperation({ summary: 'check duplicated email' })
   @ApiOkResponse({
     description: 'is duplicated',
-    type: IsDuplicated,
+    type: Boolean,
   })
   @Get('/check-duplicate/email')
-  async isDuplicatedEmail(@Query('id') email: string): Promise<IsDuplicated> {
+  async isDuplicatedEmail(@Query('id') email: string): Promise<Boolean> {
     return await this.userService.IsDuplicatedEmail(email);
   }
 
@@ -49,10 +49,10 @@ export class UserController {
   @ApiOperation({ summary: 'sign up' })
   @ApiOkResponse({
     description: 'success',
-    type: IsSuccess,
+    type: Boolean,
   })
   @Post('/signup')
-  async createUser(@Body() userDTO: UserDTO): Promise<IsSuccess> {
+  async createUser(@Body() userDTO: UserDTO): Promise<Boolean> {
     return await this.userService.CreateUser(userDTO);
   }
 
@@ -61,19 +61,21 @@ export class UserController {
   @ApiOperation({ summary: 'sign-in' })
   @ApiOkResponse({
     description: 'success',
-    type: LoginOutputDTO,
+    type: LoginOutputDTO || Boolean,
   })
   @Post('/signin')
-  async login(@Body() loginDTO: LoginInputDTO): Promise<LoginOutputDTO | boolean> {
+  async login(
+    @Body() loginDTO: LoginInputDTO,
+  ): Promise<LoginOutputDTO | Boolean> {
     return await this.userService.Login(loginDTO.id, loginDTO.pw);
   }
-  
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // test check middleware
   @Get('/middleware')
-  async testMiddleware(@Req() request: Request){
+  async testMiddleware(@Req() request: Request) {
     return {
-      "token_user" : request['user']
+      token_user: request['user'],
     };
   }
 }

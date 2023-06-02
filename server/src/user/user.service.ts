@@ -3,7 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 // lib
 import * as bcrypt from 'bcrypt';
-import { IsDuplicated, IsSuccess, UserDTO } from './dto/common.dto';
+import { UserDTO } from './dto/common.dto';
 import { User } from './entity/user.entity';
 
 import { UserRepository } from './user.repo';
@@ -16,12 +16,11 @@ export class UserService {
   constructor(
     private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
-    private readonly logger: LoggerService
+    private readonly logger: LoggerService,
   ) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated id
-  async IsDuplicatedID(id: string): Promise<IsDuplicated> {
-    let result: IsDuplicated = { is_duplicated: false };
+  async IsDuplicatedID(id: string): Promise<Boolean> {
     try {
       const res = await this.userRepo.findBy({
         id,
@@ -29,11 +28,10 @@ export class UserService {
       // ID exist
       if (res.length > 0) {
         console.info('is duplicated ID');
-        result.is_duplicated = true;
-        return result;
+        return true;
       }
     } catch (err) {
-      this.logger.error("Failed to check user ID", "IsDuplicatedID");
+      this.logger.error('Failed to check user ID', 'IsDuplicatedID');
       throw new HttpException(
         {
           message: 'Failed to check user ID',
@@ -42,13 +40,12 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return result;
+    return false;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated email
-  async IsDuplicatedEmail(email: string): Promise<IsDuplicated> {
-    let result: IsDuplicated = { is_duplicated: false };
+  async IsDuplicatedEmail(email: string): Promise<Boolean> {
     try {
       const res = await this.userRepo.findBy({
         email,
@@ -56,8 +53,7 @@ export class UserService {
       // Email exist
       if (res.length > 0) {
         console.info('is duplicated Email');
-        result.is_duplicated = true;
-        return result;
+        return true;
       }
     } catch (err) {
       throw new HttpException(
@@ -68,13 +64,12 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    return result;
+    return false;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // sign-up
-  async CreateUser(userDTO: UserDTO): Promise<IsSuccess> {
-    let result: IsSuccess = { success: false };
+  async CreateUser(userDTO: UserDTO): Promise<Boolean> {
     // 1. create User entity
     const user: User = {
       // user_idx의 경우 auto increment라서 임의의 값 지정해줌
@@ -88,23 +83,21 @@ export class UserService {
     // 2. check duplicated
     {
       try {
-        if ((await this.IsDuplicatedID(user.id)).is_duplicated) return result;
-        if ((await this.IsDuplicatedEmail(user.email)).is_duplicated)
-          return result;
+        if (await this.IsDuplicatedID(user.id)) return false;
+        if (await this.IsDuplicatedEmail(user.email)) return false;
       } catch (err) {
         // already wrap error
         throw err;
       }
     }
 
-    
     // 3. pw encryption
     user.pw = await bcrypt.hash(user.pw, 10);
 
     // 4. save user
     try {
       const res = await this.userRepo.createUser(user);
-      if (!res) return result;
+      if (!res) return false;
     } catch (err) {
       throw new HttpException(
         {
@@ -114,15 +107,12 @@ export class UserService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-    result.success = true;
-    return result;
+    return true;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // login
-  async Login(id: string, pw: string): Promise<LoginOutputDTO | boolean> {
-    this.logger.info("lolololo")
-    this.logger.error("aaaaa", "bbbb")
+  async Login(id: string, pw: string): Promise<LoginOutputDTO | Boolean> {
     // 1. id에 맞는 user 찾아오기
     let user: User | undefined;
     {
