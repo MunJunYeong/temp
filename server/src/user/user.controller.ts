@@ -8,10 +8,16 @@ import {
 } from '@nestjs/swagger';
 
 // lib
-import { LoginInputDTO, LoginOutputDTO } from './dto/controller.dto';
+import {
+  EmailOnlyDTO,
+  LoginInputDTO,
+  LoginOutputDTO,
+  ResetPasswordDTO,
+} from './dto/controller.dto';
 import { UserDTO } from './dto/common.dto';
 import { UserService } from './user.service';
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 @ApiTags('user')
 @ApiResponse({
   status: 500,
@@ -68,6 +74,34 @@ export class UserController {
     @Body() loginDTO: LoginInputDTO,
   ): Promise<LoginOutputDTO | Boolean> {
     return await this.userService.Login(loginDTO.id, loginDTO.pw);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // forgot id
+  @ApiOperation({ summary: 'find id' })
+  @ApiOkResponse({
+    description: 'is match email, show id',
+    type: Boolean,
+  })
+  @Post('/forgot-id')
+  async findID(@Body() emailOnlyDTO: EmailOnlyDTO): Promise<Boolean> {
+    return await this.userService.retrieveID(emailOnlyDTO.email);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // reset password
+  @ApiOperation({ summary: 'reset password' })
+  @ApiOkResponse({
+    description: 'reset password',
+    type: Boolean,
+  })
+  @Post('/reset-password')
+  async resetPassword(@Body() pwDTO: ResetPasswordDTO): Promise<Boolean> {
+    return await this.userService.resetPassword(
+      pwDTO.id,
+      pwDTO.email,
+      pwDTO.pw,
+    );
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

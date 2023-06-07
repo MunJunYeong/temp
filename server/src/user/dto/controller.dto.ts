@@ -28,3 +28,31 @@ export class LoginOutputDTO {
   })
   refresh_token: string;
 }
+
+export class EmailOnlyDTO {
+  @ApiProperty({
+    example: 'string',
+    description: 'email',
+  })
+  email: string;
+}
+
+export class ResetPasswordDTO {
+  @ApiProperty({
+    example: 'string',
+    description: 'email',
+  })
+  email: string;
+
+  @ApiProperty({
+    example: 'string',
+    description: 'id',
+  })
+  id: string;
+
+  @ApiProperty({
+    example: 'string',
+    description: 'password',
+  })
+  pw: string;
+}

@@ -73,7 +73,7 @@ export class UserService {
     // 1. create User entity
     const user: User = {
       // user_idx의 경우 auto increment라서 임의의 값 지정해줌
-      user_idx: 1,
+      user_idx: 0,
       id: userDTO.id,
       pw: userDTO.pw,
       name: userDTO.name,
@@ -96,7 +96,7 @@ export class UserService {
 
     // 4. save user
     try {
-      const res = await this.userRepo.createUser(user);
+      const res = await this.userRepo.save(user);
       if (!res) return false;
     } catch (err) {
       throw new HttpException(
@@ -117,7 +117,9 @@ export class UserService {
     let user: User | undefined;
     {
       try {
-        user = await this.userRepo.findOneByID(id);
+        user = await this.userRepo.findOneBy({
+          id,
+        });
         if (!user) {
           return false;
         }
@@ -150,5 +152,89 @@ export class UserService {
       }),
     };
     return res;
+  }
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // forgot id
+  async retrieveID(email: string): Promise<boolean> {
+    // 1. 해당 email의 user를 찾는다.
+    let user: User;
+    try {
+      user = await this.userRepo.findOneBy({
+        email,
+      });
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: 'Failed to find user Email',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    if (!user) {
+      return false;
+    }
+
+    // 2. 해당 유저의 ID를 email로 전송하는 것이 basic flow
+    // TODO: 아니면 그냥 ID만 return해줘서 화면에 뿌려주기 ?
+    console.info(`입력한 '${email}'의 사용자 ID : ${user.id}`);
+
+    return true;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // check user
+  async checkUser(id: string, email: string) {
+    try {
+      const res = await this.userRepo.findBy({
+        id,
+        email,
+      });
+      // 일치하는 user가 없다면
+      if (res.length === 0) return false;
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: 'Failed to find user Email',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return true;
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // reset pw
+  async resetPassword(id: string, email: string, pw: string) {
+    let user: User;
+    // 1. id, email과 matching되는 user 찾기
+    {
+      try {
+        user = await this.userRepo.findOneBy({
+          id,
+          email,
+        });
+      } catch (err) {
+        throw new HttpException(
+          {
+            message: 'Failed to find user Email',
+            error: err.message,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      // 일치하는 user가 없다면
+      if (!user) return false;
+    }
+
+    // 2. pw 암호화
+    user.pw = await bcrypt.hash(pw, 10);
+
+    // 해당 user의 pw를 변경
+    await this.userRepo.save(user);
+
+    return true;
   }
 }
