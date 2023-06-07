@@ -232,8 +232,64 @@ export class UserService {
     // 2. pw 암호화
     user.pw = await bcrypt.hash(pw, 10);
 
-    // 해당 user의 pw를 변경
-    await this.userRepo.save(user);
+    // 3. update user data
+    try {
+      await this.userRepo.save(user);
+    } catch (err) {
+      throw new HttpException(
+        {
+          message: 'Failed to update user pw',
+          error: err.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return true;
+  }
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // update user data
+  async UpdateUserData(userIdx: number, userDTO: UserDTO) {
+    // 1. user_idx와 matching되는 user 찾기
+    let user: User;
+    {
+      {
+        try {
+          user = await this.userRepo.findOneBy({
+            user_idx: userIdx,
+          });
+        } catch (err) {
+          throw new HttpException(
+            {
+              message: 'Failed to find user_idx',
+              error: err.message,
+            },
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+        // 일치하는 user가 없다면
+        if (!user) return false;
+      }
+    }
+
+    // 2. change user data
+    // TODO: user attribute가 추가되거나 삭제될 경우 수정해야함.
+    user.id = userDTO.id;
+    user.name = userDTO.name;
+
+    // 3. update user data
+    {
+      try {
+        await this.userRepo.save(user);
+      } catch (err) {
+        throw new HttpException(
+          {
+            message: 'Failed to update user data',
+            error: err.message,
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
 
     return true;
   }
