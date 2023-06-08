@@ -1,6 +1,12 @@
-import { Controller } from '@nestjs/common';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get } from '@nestjs/common';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { WeatherService } from './weather.service';
+import { WeatherDTO } from 'src/user/dto/common.dto';
 
 @ApiTags('weather')
 @ApiResponse({
@@ -12,5 +18,14 @@ export class WeatherController {
   constructor(private readonly weatherService: WeatherService) {}
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // check duplicated id
+  // get weather data
+  @ApiOperation({ summary: 'get seoul weather' })
+  @ApiOkResponse({
+    description: 'get seoul weather',
+    type: WeatherDTO,
+  })
+  @Get('')
+  async GetCurrentWeather(): Promise<WeatherDTO> {
+    return await this.weatherService.GetCurrentWeather();
+  }
 }
