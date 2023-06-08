@@ -1,5 +1,14 @@
 // core
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Put,
+  Post,
+  Query,
+  Req,
+  Param,
+} from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiOperation,
@@ -102,6 +111,21 @@ export class UserController {
       pwDTO.email,
       pwDTO.pw,
     );
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // reset password
+  @ApiOperation({ summary: 'update user data' })
+  @ApiOkResponse({
+    description: 'update user data',
+    type: Boolean,
+  })
+  @Put('/:user_idx')
+  async updateUserData(
+    @Param('user_idx') userIdx: number,
+    @Body() userDTO: UserDTO,
+  ): Promise<Boolean> {
+    return await this.userService.UpdateUserData(userIdx, userDTO);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
