@@ -81,7 +81,6 @@ export class UserService {
       name: userDTO.name,
       email: userDTO.email,
     };
-    
     // 2. check duplicated
     {
       try {

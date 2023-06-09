@@ -32,19 +32,3 @@ export class UserDTO {
   })
   end: string;
 }
-
-export class IsSuccess {
-  @ApiProperty({
-    example: 'boolean',
-    description: 'success',
-  })
-  success: boolean;
-}
-
-export class IsDuplicated {
-  @ApiProperty({
-    example: 'boolean',
-    description: 'is duplicated',
-  })
-  is_duplicated: boolean;
-}
