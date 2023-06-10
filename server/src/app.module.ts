@@ -15,6 +15,7 @@ import { WeatherModule } from './weather/weather.module';
 import { DatabaseModule } from './lib/database/database.module';
 import { CustomMiddleware } from './lib/middleware/middleware.service';
 import { JwtModule } from './lib/jwt/jwt.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { JwtModule } from './lib/jwt/jwt.module';
     WeatherModule,
     DatabaseModule,
     JwtModule,
+    ScheduleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
