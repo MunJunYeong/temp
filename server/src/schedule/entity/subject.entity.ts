@@ -1,14 +1,9 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Schedule } from './schedule.entity';
 
 @Entity()
 export class Subject {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   subject_idx: number;
 
   @Column()
