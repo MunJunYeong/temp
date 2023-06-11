@@ -1,6 +1,6 @@
 // lib
 import { Schedule } from 'src/schedule/entity/schedule.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -20,5 +20,6 @@ export class User {
   email: string;
 
   @OneToOne(() => Schedule)
+  @JoinColumn({name:'schedule_idx'})
   schedule: Schedule;
 }

@@ -38,5 +38,6 @@ export class AppModule implements NestModule {
       path: 'v1/users/middleware',
       method: RequestMethod.GET,
     });
+    consumer.apply(CustomMiddleware).forRoutes('v1/schedule/*');
   }
 }

@@ -9,15 +9,12 @@ import { UserRepository } from './user.repo';
 import { User } from './entity/user.entity';
 import { JwtModule } from 'src/lib/jwt/jwt.module';
 import { LoggerModule } from 'src/lib/logger/logger.module';
+import { ScheduleRepository } from 'src/schedule/schedule.repo';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    JwtModule,
-    LoggerModule
-  ],
+  imports: [TypeOrmModule.forFeature([User]), JwtModule, LoggerModule],
   controllers: [UserController],
-  providers: [UserService, UserRepository],
-  exports : [UserService, UserRepository]
+  providers: [UserService, UserRepository, ScheduleRepository],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}
