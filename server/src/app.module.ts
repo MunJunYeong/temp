@@ -34,10 +34,13 @@ import { ScheduleModule } from './schedule/schedule.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CustomMiddleware).forRoutes({
-      path: 'v1/users/middleware',
-      method: RequestMethod.GET,
-    });
-    consumer.apply(CustomMiddleware).forRoutes('v1/schedule/*');
+    consumer
+      .apply(CustomMiddleware)
+      .forRoutes({
+        path: 'v1/users/middleware',
+        method: RequestMethod.GET,
+      })
+      .apply(CustomMiddleware)
+      .forRoutes('v1/schedule/*');
   }
 }

@@ -9,7 +9,7 @@ import { SubjectDTO } from './dto/common.dto';
   status: 500,
   description: 'Internal server error',
 })
-@Controller('schedule')
+@Controller('v1/schedule')
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
@@ -22,7 +22,6 @@ export class ScheduleController {
   })
   @Post('/subject')
   async addSubject(@Req() request: Request, @Body() subjectDTO: SubjectDTO): Promise<Boolean> {
-    
-    return true;
+    return this.scheduleService.AddSubject(request['user'], subjectDTO);
   }
 }
