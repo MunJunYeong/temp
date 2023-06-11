@@ -10,13 +10,16 @@ import { UserRepository } from './user.repo';
 import { LoginOutputDTO } from './dto/controller.dto';
 import { JwtService } from 'src/lib/jwt/jwt.service';
 import { LoggerService } from 'src/lib/logger/logger.service';
+import { ScheduleRepository } from 'src/schedule/schedule.repo';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
     private readonly logger: LoggerService,
+    private readonly userRepo: UserRepository,
+    private readonly scheduleRepo: ScheduleRepository,
+
   ) {}
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // is duplicated id
@@ -78,6 +81,7 @@ export class UserService {
       pw: userDTO.pw,
       name: userDTO.name,
       email: userDTO.email,
+      schedule: null,
     };
 
     // 2. check duplicated
@@ -96,8 +100,17 @@ export class UserService {
 
     // 4. save user
     try {
-      const res = await this.userRepo.save(user);
-      if (!res) return false;
+      // TODO: Transaction으로 묶어주는 것이 안전
+      // 4-1. user 생성
+      const tempUser = await this.userRepo.save(user);
+      if (!tempUser) return false;
+
+      // 4-2. schedule생성시 위의 user 추가
+      const tempSchedule = await this.scheduleRepo.save({user: tempUser});
+
+      // 4-3. user에 schedule 생성
+      tempUser.schedule = tempSchedule;
+      await this.userRepo.save(tempUser)
     } catch (err) {
       throw new HttpException(
         {

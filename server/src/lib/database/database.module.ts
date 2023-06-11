@@ -2,6 +2,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Schedule } from 'src/schedule/entity/schedule.entity';
+import { Subject } from 'src/schedule/entity/subject.entity';
 
 // lib
 import { User } from 'src/user/entity/user.entity';
@@ -18,7 +20,7 @@ import { User } from 'src/user/entity/user.entity';
         username: cfgService.get('DB_USER'),
         password: cfgService.get('DB_PW'),
         database: cfgService.get('DB_NAME'),
-        entities: [User],
+        entities: [User, Schedule, Subject],
         synchronize: true,
       }),
     }),
